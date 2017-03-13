@@ -1,0 +1,109 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta name="viewport" content="width=320, user-scalable=no" />
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+<title>NFC Reader Demo</title>
+<link rel="stylesheet" href="css/nfc.css" type="text/css" media="screen" title="no title" charset="utf-8">
+</head>
+
+<body>
+    <h1>NFC Reader</h1>
+    <div id="tagContents">
+        <div class="hidden">
+            Scan a tag to begin.
+        </div>
+    </div>
+
+    <script id="non-ndef-template" type="text/x-handlebars-template">
+        <p>Scanned a non-NDEF NFC tag</p>
+        <p>
+            Tag Id: <strong>{{ bytesToHexString id }}</strong>
+        </p>
+    </script>
+
+    <script id="tag-template" type="text/x-handlebars-template">
+        <p>Scanned an NDEF tag with {{ ndefMessage.length }} {{ pluralize ndefMessage.length 'record' 'records' }}</p>
+
+        {{!
+            BB10 and WP8 will not have any meta info
+            Android P2P will not have id, but will have type
+        }}
+        <dl>
+            {{#if id}}
+            <dt>Tag Id</dt>             <dd>{{ bytesToHexString id }}</dd>
+            {{/if}}
+            
+            {{#if type}}
+            <dt>Tag Type</dt>           <dd>{{ type }}</dd>
+            {{/if}}
+
+            {{#if maxSize }}
+            <dt>Max Size</dt>           <dd>{{ maxSize }} bytes</dd>
+            {{/if}}            
+
+            {{#if freeSpaceSize }}
+            <dt>Free Space</dt>         <dd>{{ freeSpaceSize }} bytes</dd>
+            {{/if}}
+
+            {{#if id}}
+            <dt>Is Writable</dt>        <dd>{{ toString isWritable }}</dd>
+            <dt>Can Make Read Only</dt> <dd>{{ toString canMakeReadOnly }}</dd>
+            {{/if}}            
+        </dl>
+
+        {{#each ndefMessage}}  {{! does not read well, iterating on records non messages}}
+        <div class='record'>
+            Record {{ @index }}:<br/>
+            TNF: <b>{{ tnfToString tnf }}</b><br/>        
+            {{#if tnf}}
+                Record Type: <b>{{ bytesToString type }}</b><br/>
+                Payload: <b>{{ decodePayload this }}</b><br/>
+                {{#if id}}
+                    Record Id: <b>{{ bytesToString id }}</b><br/>            
+                {{/if}}
+            {{/if}}
+        </div>
+        {{/each}}
+    </script>
+    
+    <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/handlebars.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/nfc.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery.mobile.min.js"></script>
+    <script src="js/force.js"></script>
+
+
+    <script type="text/javascript">
+        jQuery(document).ready(function() {
+    /* This will only be true when testing in a browser with MockCordova */
+        if (cordova.interceptExec) {
+            force.init({loginURL: "https://test.salesforce.com/",
+                        appId: "3MVG98dostKihXN53TYStBIiS8BTFb20jwWfFcShqfABb3c.HH3CkmA00FuCmc0aM3v4LZOGR5QBnEi77fotN",
+                        oauthCallbackURL: "http://localhost:8200/test/oauthcallback.html",
+                        useCordova: false /* running in browser with mock cordova - so do oauth through browser and network through xhr */
+                       });
+        }
+
+        /* Do login */
+        force.login(
+            function() {
+                console.log("Auth succeeded");
+
+                //regLinkClickHandlers();
+
+                // retrieve Merchandise records, including the Id for links
+                //force.query("SELECT Id, Name, Price__c, Quantity__c FROM Merchandise__c", onSuccessSfdcMerchandise, onErrorSfdc);
+            },
+            function(error) {
+                console.log("Auth failed: " + error);
+            }
+        );
+     });
+
+
+        app.initialize();
+    </script>
+</body>
+</html>

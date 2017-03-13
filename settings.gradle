@@ -1,0 +1,8 @@
+// GENERATED FILE - DO NOT EDIT
+include ":"
+include ":CordovaLib"
+include ":SalesforceAnalytics"
+include ":SalesforceSDK"
+include ":SmartStore"
+include ":SmartSync"
+include ":SalesforceHybrid"

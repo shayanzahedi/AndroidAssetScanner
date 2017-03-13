@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="Content-type" content="text/html, charset=utf-8">
+
+    <!-- include jquery mobile old
+    <link rel="stylesheet" href="css/assetscanner.min.css" />
+    <link rel="stylesheet" href="css/jquery.mobile.min.css" />
+    <link rel="stylesheet" href="css/jquery.mobile.icons.min.css" />
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery.mobile.min.js"></script>
+     -->
+
+
+    <link rel="stylesheet" href="css/assetscanner.min.css" />
+    <link rel="stylesheet" href="css/jquery.mobile.icons.min.css" />
+    <link rel="stylesheet" href="css/jquery.mobile.structure-1.4.5.min.css" />
+    <script src="js/jquery-1.11.1.min.js"></script>
+    <script src="js/jquery.mobile-1.4.5.min.js"></script>
+
+
+
+
+    <!-- load our app-specific code -->
+    <script src="inline.js"></script>
+
+
+
+    <!-- Local Testing -/->
+    <script src="js/MockCordova.js"></script>
+    <script src="js/cordova.force.js"></script>
+    <!-- End Local Testing -->
+
+    <!-- Container -->
+    <script src="cordova.js"></script>
+    <!-- End Container -->
+
+    <!-- include force.js for REST transaction support -->
+    <script src="js/force.js"></script>
+
+    <!-- log window styling -->
+    <style>
+      .logWindow {display:none; width:700px;}
+      .logWindow > p {padding:0px; margin:0px; word-wrap:break-word;}
+
+
+      .ui-btn{height:200px;}
+
+    </style>
+
+
+    <script>
+
+  // The version of the REST API you wish to use in your app.
+  var apiVersion = "v36.0";
+
+	// If you want to prevent dragging, uncomment this section
+	/*
+	function preventBehavior(e)
+	{
+      e.preventDefault();
+    };
+	document.addEventListener("touchmove", preventBehavior, false);
+	*/
+
+	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
+	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
+	for more details -jm */
+	/*
+	function handleOpenURL(url)
+	{
+		// do something with the url passed in.
+	}
+	*/
+
+    var debugMode = true;
+
+    jQuery(document).ready(function() {
+    /* This will only be true when testing in a browser with MockCordova */
+        if (cordova.interceptExec) {
+            force.init({loginURL: "https://test.salesforce.com/",
+                        appId: "3MVG98dostKihXN53TYStBIiS8BTFb20jwWfFcShqfABb3c.HH3CkmA00FuCmc0aM3v4LZOGR5QBnEi77fotN",
+                        oauthCallbackURL: "http://localhost:8200/test/oauthcallback.html",
+                        useCordova: false /* running in browser with mock cordova - so do oauth through browser and network through xhr */
+                       });
+        }
+
+        /* Do login */
+        force.login(
+            function() {
+                console.log("Auth succeeded");
+
+                //regLinkClickHandlers();
+
+            },
+            function(error) {
+                console.log("Auth failed: " + error);
+            }
+        );
+    });
+
+
+
+
+
+
+    </script>
+
+
+
+</head>
+<body style="height:100%;">
+
+<!-- Main page, to display list of Merchandise once app starts -->
+<div data-role="page" data-theme="b" id="mainpage" >
+
+    <table style="width:100%;height:100%;">
+        <tr>
+            <td><button data-theme="a" onclick="barcodeScan('service')" >Service<br><img src="css/images/icons-png/check-white.png"></button></td>
+            <td><button data-theme="b" onclick="barcodeScan('mark')">Mark<br><img src="css/images/icons-png/alert-white.png"></button></td>
+        </tr>
+        <tr>
+            <td><button data-theme="c" onclick="barcodeScan('install')">Install<br><img src="css/images/icons-png/action-white.png"></button></td>
+            <td><button data-theme="d" onclick="barcodeScan('remove')">Remove<br><img src="css/images/icons-png/delete-white.png"></button></td>
+        </tr>
+        <tr>
+            <td><button data-theme="e" onclick="nfcScan()">NFC<br><img src="css/images/icons-png/tag-white.png"></button></td>
+            <td></td>
+        </tr>
+    </table>
+
+
+
+
+
+</div>
+
+
+<!-- NFC Scan Page -->
+<div data-role="page" data-theme="b" id="nfcscan">
+    <!-- page header -->
+    <div  data-role="header">
+        <!-- button for going back to mainpage -->
+        <a href='#mainpage' id="nfcscan"
+           class='ui-btn-left' data-icon='home'>
+            Home
+        </a>
+        <!-- page title -->
+        <h1>NFC Scan</h1>
+    </div>
+    <!-- page content -->
+    <div id="#content" data-role="content">
+    test
+    </div>
+</div>
+
+
+<!-- Detail page, to display details when user clicks specific Merchandise record -->
+<div data-role="page" data-theme="b" id="detailpage">
+    <!-- page header -->
+    <div  data-role="header">
+        <!-- button for going back to mainpage -->
+        <a href='#mainpage' id="backInventory"
+           class='ui-btn-left' data-icon='home'>
+            Home
+        </a>
+        <!-- page title -->
+        <h1>Edit</h1>
+    </div>
+    <!-- page content -->
+    <div id="#content" data-role="content">
+        <h2 id="name"></h2>
+        <label for="price">
+            Price ($):</label>
+        <input type="text" id="price" readonly="readonly"></input>
+        <br/>
+        <label for="quantity">
+            Quantity:</label>
+        <!-- note that number is not universally supported -->
+        <input type="number" id="quantity"></input>
+        <br/>
+        <a href="#" data-role="button" id="updateButton"
+           data-theme="b">Update</a>
+    </div>
+</div>
+</body>
+</html>
