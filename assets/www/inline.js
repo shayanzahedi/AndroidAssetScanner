@@ -29,7 +29,7 @@ function onSuccessSFAssetScan(response) {
        }else if (barcodeAction == "remove"){
             data.Status = "Decommissioned";
        }
-       data.Last_Service_Date__c = new Date();
+       data.assetscanner__Last_Service_Date__c = new Date();
        force.update("Asset",data,updateSuccess,onErrorSfdc);
     }else if(response.totalSize == "0"){
            alert("No assets found. " + JSON.stringify(response));
@@ -41,8 +41,8 @@ function onSuccessSFAssetScan(response) {
 }
 
 function onErrorSfdc(error) {
-    cordova.require("com.salesforce.util.logger").logToConsole("onErrorSfdc: " + JSON.stringify(error));
     alert(JSON.stringify(error));
+    cordova.require("com.salesforce.util.logger").logToConsole("onErrorSfdc: " + JSON.stringify(error));
 }
 
 function updateSuccess(message) {

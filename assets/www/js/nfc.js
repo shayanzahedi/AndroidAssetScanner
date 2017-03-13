@@ -243,7 +243,7 @@ function onSuccessSFAssetScan(response) {
        data.Id =  response.records[0].Id;
        data.SerialNumber = nfcScanValue;
        data.Status = "Serviced";
-       data.Last_Service_Date__c = new Date();
+       data.assetscanner__Last_Service_Date__c = new Date();
        force.update("Asset",data,updateSuccess,onErrorSfdc);
     }else if(response.totalSize == "0"){
             alert("No assets found. " + JSON.stringify(response));
