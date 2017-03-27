@@ -1,4 +1,5 @@
 var nfcScanValue = "";
+var assetTagSFID="";
 var app = {
     initialize: function () {
         this.bind();
@@ -58,7 +59,7 @@ var app = {
 
         /*Sales force specific updates*/
         nfcScanValue = numArraytoHex(tag.id);
-        force.query("SELECT Id, Name FROM Asset WHERE SerialNumber='" + nfcScanValue + "'", onSuccessSFAssetScan, onErrorSfdc);
+        force.query("SELECT Id, Name,assetscanner__Parent_Asset__c FROM assetscanner__AssetTag__c WHERE Name='" + nfcScanValue + "'", onSuccessSFAssetScan, onErrorSfdc);
         /*Sales force specific updates*/
 
         tagContents.innerHTML = app.nonNdefTagTemplate(tag);
@@ -80,7 +81,7 @@ var app = {
 
         /*Sales force specific updates*/
         nfcScanValue = numArraytoHex(tag.id);
-        force.query("SELECT Id, Name FROM Asset WHERE SerialNumber='" + nfcScanValue + "'", onSuccessSFAssetScan, onErrorSfdc);
+        force.query("SELECT Id, Name,assetscanner__Parent_Asset__c FROM assetscanner__AssetTag__c WHERE Name='" + nfcScanValue + "'", onSuccessSFAssetScan, onErrorSfdc);
         /*Sales force specific updates*/
 
         tagContents.innerHTML = app.tagTemplate(tag);
@@ -239,23 +240,29 @@ function onSuccessSFAssetScan(response) {
     var $j = jQuery.noConflict();
     var logToConsole = cordova.require("com.salesforce.util.logger").logToConsole;
     if (response.totalSize == "1"){
+       assetTagSFIDScan =  response.records[0].Id;
        var data = new Object();
-       data.Id =  response.records[0].Id;
+       data.Id =  response.records[0].assetscanner__Parent_Asset__c;
        data.SerialNumber = nfcScanValue;
        data.Status = "Serviced";
-       data.assetscanner__Last_Service_Date__c = new Date();
-       force.update("Asset",data,updateSuccess,onErrorSfdc);
+       force.update("Asset",data,updateSuccessAsset,onErrorSfdc);
     }else if(response.totalSize == "0"){
-            alert("No assets found. " + JSON.stringify(response));
+            alert("No assets found matching " + nfcScanValue);
     }else if(response.totalSize != "0"){
-        alert("Multiple assets found with the same serial number. " + JSON.stringify(response));
+        alert("Multiple assets found with the same serial number " + nfcScanValue);
     }else{
         alert("Update Error " + JSON.stringify(response));
     }
 }
+function updateSuccessAsset(message) {
+       var data = new Object();
+       data.Id =  assetTagSFIDScan;
+       force.update("assetscanner__AssetTag__c",data,updateSuccessAssetTag,onErrorSfdc);
+}
 
-function updateSuccess(message) {
+function updateSuccessAssetTag(message) {
     nfcScanValue= "";
+    assetTagSFID="";
 }
 
 function onErrorSfdc(error) {
