@@ -1,6 +1,7 @@
 //Sample code for Hybrid REST Explorer
 var barcodeScanValue = "";
 var barcodeAction = "";
+var assetTagSFID="";
 function barcodeScan(action){
     cordova.plugins.barcodeScanner.scan(function(result){
     //success callback
@@ -8,7 +9,7 @@ function barcodeScan(action){
     barcodeAction = action;
 
     if(barcodeScanValue != "" && barcodeAction!= "" )
-        force.query("SELECT Id, Name FROM Asset WHERE SerialNumber='" + result.text + "'", onSuccessSFAssetScan, onErrorSfdc);
+        force.query("SELECT Id, Name,assetscanner__Parent_Asset__c FROM assetscanner__AssetTag__c WHERE Name='" + result.text + "'", onSuccessSFAssetScan, onErrorSfdc);
     },function(error){
     //error callback
         alert(JSON.stringify(error));
@@ -19,8 +20,9 @@ function onSuccessSFAssetScan(response) {
     var $j = jQuery.noConflict();
     var logToConsole = cordova.require("com.salesforce.util.logger").logToConsole;
     if (response.totalSize == "1"){
+       assetTagSFID =  response.records[0].Id;
        var data = new Object();
-       data.Id =  response.records[0].Id;
+       data.Id =  response.records[0].assetscanner__Parent_Asset__c;
        data.SerialNumber = barcodeScanValue;
        if (barcodeAction == "service"){
             data.Status = "Serviced";
@@ -29,12 +31,11 @@ function onSuccessSFAssetScan(response) {
        }else if (barcodeAction == "remove"){
             data.Status = "Decommissioned";
        }
-       data.assetscanner__Last_Service_Date__c = new Date();
-       force.update("Asset",data,updateSuccess,onErrorSfdc);
+       force.update("Asset",data,updateSuccessAsset,onErrorSfdc);
     }else if(response.totalSize == "0"){
-           alert("No assets found. " + JSON.stringify(response));
+           alert("No assets found matching " + barcodeScanValue);
     }else if(response.totalSize != "0"){
-           alert("Multiple assets found with the same serial number. " + JSON.stringify(response));
+           alert("Multiple assets found with the same serial number. " + barcodeScanValue);
     }else{
            alert("Update Error " + JSON.stringify(response));
     }
@@ -45,8 +46,15 @@ function onErrorSfdc(error) {
     cordova.require("com.salesforce.util.logger").logToConsole("onErrorSfdc: " + JSON.stringify(error));
 }
 
-function updateSuccess(message) {
+function updateSuccessAsset(message) {
+       var data = new Object();
+       data.Id =  assetTagSFID;
+       force.update("assetscanner__AssetTag__c",data,updateSuccessAssetTag,onErrorSfdc);
+}
+
+function updateSuccessAssetTag(message) {
     barcodeScanValue= "";
+    assetTagSFID="";
     barcodeScan(barcodeAction);
 }
 
